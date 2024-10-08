@@ -45,9 +45,9 @@ void set_ulimit(long new_ulimit) {
 void print_core_size() {
     struct rlimit rl;
     if (getrlimit(RLIMIT_CORE, &rl) == 0) {
-        printf("Core file size limit: %ld bytes\n", rl.rlim_cur);
+        printf("Core file size: %ld bytes\n", rl.rlim_cur);
     } else {
-        perror("Getrlimit error");
+        perror("getrlimit");
     }
 }
 
