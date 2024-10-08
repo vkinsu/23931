@@ -33,24 +33,24 @@ int main(int argc, char *argv[]) {
     struct stat file_stat;
 
     if (argc != 2) {
-        fprintf(stderr, "Использование: %s <файл>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <файл>\n", argv[0]);
         exit(1);
     }
 
     if ((fd = open(argv[1], O_RDONLY)) == -1) {
-        perror("Ошибка открытия файла");
+        perror("Error in opening file");
         exit(1);
     }
 
     if (fstat(fd, &file_stat) == -1) {
-        perror("Ошибка получения информации о файле");
+        perror("Error recieving information");
         close(fd);
         exit(1);
     }
 
     file_data = mmap(NULL, file_stat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (file_data == MAP_FAILED) {
-        perror("Ошибка отображения файла в память");
+        perror("Error transfering to memory");
         close(fd);
         exit(1);
     }
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (i >= MAX_LINES) {
-        fprintf(stderr, "Файл содержит более %d строк\n", MAX_LINES - 1);
+        fprintf(stderr, "File contains more than %d lines\n", MAX_LINES - 1);
         munmap(file_data, file_stat.st_size);
         close(fd);
         exit(1);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
     sigaction(SIGALRM, &sa, NULL);
 
     while (1) {
-        printf("Введите номер строки (0 для выхода): ");
+        printf("Enter number of line (0 for exit): ");
         alarm(TIMEOUT);  // Установка таймера на 5 секунд
         if (scanf("%d", &line_number) == 1) {
             alarm(0);  // Отмена таймера, если ввод успешен
@@ -96,15 +96,15 @@ int main(int argc, char *argv[]) {
             }
 
             if (line_number < 1 || line_number >= i) {
-                printf("Неверный номер строки. Доступные строки: 1-%d\n", i - 1);
+                printf("Incorrect line number. You can choose from: 1-%d\n", i - 1);
                 continue;
             }
 
-            printf("Строка %d: %.*s\n", line_number, line_ln[line_number], file_data + lines_pos[line_number]);
+            printf("Line %d: %.*s\n", line_number, line_ln[line_number], file_data + lines_pos[line_number]);
         } else {
             // Очистка буфера ввода
             while (getchar() != '\n');
-            printf("Неправильный ввод. Пожалуйста, введите число.\n");
+            printf("Incorrect input. Please, enter number.\n");
             continue;
         }
     }
