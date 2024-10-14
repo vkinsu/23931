@@ -78,9 +78,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Output the table of offsets and line lengths for verification
-    for (int k = 0; k < i; k++) {
-        printf("Line %d: offset=%ld, length=%d\n", k + 1, lines_pos[k], line_ln[k]);
-    }
+    //for (int k = 0; k < i; k++) {
+    //    printf("Line %d: offset=%ld, length=%d\n", k + 1, lines_pos[k], line_ln[k]);
+    //}
 
     // Set signal handler for SIGALRM
     signal(SIGALRM, alarm_handler);

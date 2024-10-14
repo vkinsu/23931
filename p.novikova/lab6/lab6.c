@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    lines_pos[1] = 0L;
+    lines_pos[0] = 0L;  // Initialize for the first line
     while (read(fd, &c, 1) > 0) {
         if (c == '\n') {
             j++;
@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Output the table of offsets and line lengths for verification
-    //for (int k = 1; k < i; k++) {
-    //    printf("Line %d: offset=%ld, length=%d\n", k, lines_pos[k], line_ln[k]);
+    //for (int k = 0; k < i; k++) {
+    //    printf("Line %d: offset=%ld, length=%d\n", k + 1, lines_pos[k], line_ln[k]);
     //}
 
     // Set signal handler for SIGALRM
@@ -89,22 +89,22 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        if (line_number < 1 || line_number >= i) {
-            printf("Invalid line number. Available lines: 1-%d\n", i - 1);
+        if (line_number < 1 || line_number > i) {
+            printf("Invalid line number. Available lines: 1-%d\n", i);
             continue;
         }
 
-        if (lseek(fd, lines_pos[line_number], SEEK_SET) == -1) {
+        if (lseek(fd, lines_pos[line_number - 1], SEEK_SET) == -1) {
             perror("Error positioning in file");
             continue;
         }
 
-        if (read(fd, buf, line_ln[line_number]) == -1) {
+        if (read(fd, buf, line_ln[line_number - 1]) == -1) {
             perror("Error reading file");
             continue;
         }
 
-        buf[line_ln[line_number]] = '\0';
+        buf[line_ln[line_number - 1]] = '\0';
         printf("Line %d: %s\n", line_number, buf);
     }
 
