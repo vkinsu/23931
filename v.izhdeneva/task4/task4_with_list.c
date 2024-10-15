@@ -16,14 +16,14 @@ struct Node* create_node(const char *str) {
     struct Node *new_node = (struct Node*) malloc(sizeof(struct Node));
 
     if (!new_node) {
-        printf("Memory allocation error\n");
+        perror("Memory allocation error\n");
         exit(1);
     }
 
     new_node->data = (char*)malloc(strlen(str) + 1);
 
     if (!new_node->data) {
-        printf("Memory allocation error\n");
+        perror("Memory allocation error\n");
         exit(1);
     }
 
