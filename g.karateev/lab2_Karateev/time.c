@@ -6,7 +6,7 @@
 extern char *tzname[];
 
 int main() {
-    setenv("TZ", "America/Los_Angeles", 1);
+    setenv("TZ", "PST8", 1);
     tzset();
 
     time_t now;
