@@ -67,7 +67,7 @@ int main() {
         printf("Enter the number of string: ");
         int result = scanf("%d", &string_num);
 
-        if (!result || (string_num < 1 || string_num > line_count)) {
+        if (!result || ((string_num < 1 && string_num != 0) || string_num > line_count)) {
             perror("Wrong input\n");
             close(fd);
             return -1;
