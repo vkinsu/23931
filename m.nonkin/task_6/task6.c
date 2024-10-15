@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         } else {
             if (scanf("%d", &line_num) != 1) {
                 fprintf(stderr, "Invalid input\n");
-                continue;
+                break;
             }
 
             if (line_num == 0) {

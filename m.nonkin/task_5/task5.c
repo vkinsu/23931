@@ -38,7 +38,10 @@ int main(int argc, char *argv[]) {
     int line_num;
     while (1) {
         printf("Enter line number (0 to quit): ");
-        scanf("%d", &line_num);
+        if (scanf("%d", &line_num) != 1){
+		printf("Input error\n");
+		break;
+	}
 
         if (line_num == 0) {
             break;
