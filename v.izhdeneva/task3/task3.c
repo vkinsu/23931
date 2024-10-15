@@ -25,9 +25,9 @@ int main() {
 
     printf("UID: %d, EUID: %d\n", uid, euid);
 
-    fd = fopen("closed.txt", O_RDONLY);
+    fd = open("closed.txt", O_RDONLY);
 
-    if (fd != -1) fclose(fd);
+    if (fd != -1) close(fd);
     else perror("Error with open\n");
 
     return 0;
