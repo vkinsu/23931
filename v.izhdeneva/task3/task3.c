@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include<fcntl.h>
 
 int main() {
     // 1
@@ -10,10 +11,10 @@ int main() {
     printf("UID: %d, EUID: %d\n", uid, euid);
 
     // 2
-    FILE* f = fopen("closed.txt", "r+");
+    int fd = open("closed.txt", O_RDONLY);
 
-    if (f) fclose(f);
-    else perror("Ошибка при открытии файла....");
+    if (fd != -1) close(fd);
+    else perror("Error with open\n");
 
     // 3
     setuid(uid = getuid());
@@ -24,10 +25,10 @@ int main() {
 
     printf("UID: %d, EUID: %d\n", uid, euid);
 
-    f = fopen("closed.txt", "r+");
+    fd = fopen("closed.txt", O_RDONLY);
 
-    if (f) fclose(f);
-    else perror("Ошибка при открытии файла....");
+    if (fd != -1) fclose(fd);
+    else perror("Error with open\n");
 
     return 0;
 }
