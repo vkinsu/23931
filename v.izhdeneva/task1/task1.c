@@ -23,7 +23,7 @@ void set_pid_pgid() {
     if (setpgid(0, 0) == 0) {
         printf("Process %d is now the leader of its process group\n", pid);
     } else {
-        perror("Failed to become process group leader");
+        perror("Failed to become process group leader\n");
     }
 }
 
@@ -52,21 +52,21 @@ void get_ulimit_value() {
 }
 
 void set_new_ulimit(char* val) {
-    if( ulimit(2, atol(val) ) == -1)
-    fprintf(stderr,"Must be super-user to increase ulimit\n");
+    if (ulimit(2, atol(val)) == -1)
+        perror("You must be SU to increase ulimit\n");
 }
 
 struct rlimit limit;
 
 void print_core_size() {
     getrlimit(RLIMIT_CORE, &limit);
-    printf("core size = %ld\n", limit.rlim_cur);
+    printf("Сore size: %ld\n", limit.rlim_cur);
 }
 
 void set_core_size(char* val) {
     getrlimit(RLIMIT_CORE, &limit);
     limit.rlim_cur = atol(val);
-    if (setrlimit(RLIMIT_CORE, &limit) == -1) fprintf(stderr, "Must be super-user to increase core\n");
+    if (setrlimit(RLIMIT_CORE, &limit) == -1) perror("You must be SU to increase core\n");
 }
 
 void set_env_ver(char* var) {
@@ -75,7 +75,7 @@ void set_env_ver(char* var) {
 
 int main(int argc, char *argv[], char *envp[]) {
     int opt;
-    while ((opt = getopt(argc, argv, "ispdvucU:C:V:")) != -1) { ispuU:cC:dvV:
+    while ((opt = getopt(argc, argv, "ispdvucU:C:V:")) != -1) {
         switch (opt) {
             case 'i':
                 print_id();
@@ -100,6 +100,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 break;
             case 'U':
                 set_new_ulimit(optarg);
+                break;
             case 'V':
                 set_env_ver(optarg);
                 break;
@@ -107,7 +108,7 @@ int main(int argc, char *argv[], char *envp[]) {
                 set_core_size(optarg);
                 break;
             default: 
-                printf("Unknown option......\n");
+                perror("Unknown option......\n");
         }
     }
 
