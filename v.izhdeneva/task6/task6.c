@@ -16,7 +16,7 @@ int main() {
     int fd = open("input.txt", O_RDONLY);
 
     if (fd == -1) {
-        printf("Can't open the file\n");
+        perror("Can't open file\n");
         return -1;
     }
 
@@ -45,7 +45,7 @@ int main() {
     fd = open("input.txt", O_RDONLY);
 
     if (fd == -1) {
-        printf("Can't open the file\n");
+        perror("Can't open file\n");
         return -1;
     }
 
@@ -56,21 +56,22 @@ int main() {
         alarm(5);
 
         printf("You have 5 seconds to enter the number of string! Number: ");
-        scanf("%d", &string_num);
+        int result = scanf("%d", &string_num);
 
         alarm(0);
+
+        if (!result || (string_num < 1 || string_num > line_count)) {
+            perror("Wrong input\n");
+            close(fd);
+            return -1;
+        }
 
         if (string_num == 0) {
             return 0;
         }
 
-        if (string_num < 1 || string_num > line_count) {
-            printf("The wrong number of a string\n");
-            return -1;
-        }
-
         if (lseek(fd, offsets[string_num - 1], SEEK_SET) == (off_t)-1) {
-            printf("Can't read string\n");
+            perror("Can't read string\n");
             close(fd);
             return -1;
         }
