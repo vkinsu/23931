@@ -8,6 +8,7 @@ int main(int argc, char* argv[]) {
         printf("There are not enough arguments for this program!\n");
         exit(EXIT_FAILURE);
     }
+    
     pid_t process_id = fork();
     int status;
     switch (process_id) {
