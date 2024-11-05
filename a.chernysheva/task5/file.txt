@@ -1,0 +1,8 @@
+A delivery robot is needed to deliver goods or ready meals to people. 
+According to the available statistical data, accidents with the delivery robot occurs due to the collision of the robot with the environment.
+For example with passing car or person.
+Machinery designers identified hazards, so the maximum speed of the robot is 8 km per hour. It is quite possible to avoid a collision with it.
+But there is always a residual risk, for this reason we have cases of a robot colliding with a car at the pedestrian crossing, but no one injured there.
+Engineers have taken preventive measures and now the robot has appropriate sensors capable of detecting objects and their speed at a distance of 150 meters.
+Thanks to this and other components, the robot can estimate the surrounding situation for motion planning. 
+I think in the future, with improved technology, robots can replace human couriers. It has high social costs because many people may lose their jobs.
