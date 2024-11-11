@@ -7,13 +7,13 @@
 #include <errno.h>
 
 
-int main(int argv, char* argc[]) {
-    if (argv == 1) {
+int main(int argc, char* argv[]) {
+    if (argc == 1) {
         printf("No filename.\n");
         return 1;
     }
     printf("Parent pid is: %i\n", getpid());
-    char* args_to_child[] = { "cat", argc[1], NULL };
+    char* args_to_child[] = { "cat", argv[1], NULL };
     pid_t child;
 
     child = fork();
