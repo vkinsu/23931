@@ -9,6 +9,35 @@
 
 void handle_alarm(int sig) {
     printf("\nTime's up! Exiting...\n");
+
+    int fd = open("input.txt", O_RDONLY);
+    char buffer[MAX_M];
+    ssize_t bytesRead;
+    size_t i = 0;
+
+    while ((bytesRead = read(fd, buffer + i, 1)) > 0) {
+        if (buffer[i] == '\n') {
+            buffer[i] = '\0'; // Завершаем строку
+            printf("%s\n", buffer); // Печатаем строку
+            i = 0; // Сбрасываем индекс
+        } else {
+            i++;
+            if (i >= MAX_M - 1) {
+                // Если размер буфера достигнут, выводим строку
+                buffer[i] = '\0';
+                printf("%s\n", buffer);
+                i = 0; // Сбрасываем индекс
+            }
+        }
+    }
+
+    // Печатаем последнюю строку, если она не завершается новой строкой
+    if (i > 0) {
+        buffer[i] = '\0';
+        printf("%s\n", buffer);
+    }
+
+    close(fd);
     _exit(0);
 }
 
