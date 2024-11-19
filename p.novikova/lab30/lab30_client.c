@@ -1,39 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#define SOCKET_PATH "/tmp/uppercase_socket"
+#define SOCKET_PATH "./unix_domain_socket"
 
 int main() {
-    int client_fd;
-    struct sockaddr_un server_addr;
+  int client_fd;
+  struct sockaddr_un address;
+  char buffer[1024];
 
-    // Create socket
-    client_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (client_fd == -1) {
-        perror("socket");
-        exit(EXIT_FAILURE);
-    }
+  // Создаем сокет
+  client_fd = socket(AF_UNIX, SOCK_STREAM, 0); // потоковый сокет
+  if (client_fd == -1) {
+    perror("\nSocket making error\n");
+    exit(1);
+  }
 
-    // Set up server address structure
-    server_addr.sun_family = AF_UNIX;
-    strncpy(server_addr.sun_path, SOCKET_PATH, sizeof(server_addr.sun_path) - 1);
+  // Настраиваем адрес сокета
+  address.sun_family = AF_UNIX;
+  strncpy(address.sun_path, SOCKET_PATH, sizeof(address.sun_path) - 1);
 
-    // Connect to the server
-    if (connect(client_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-        perror("connect");
-        exit(EXIT_FAILURE);
-    }
-
-    // Send data to the server
-    char message[] = "Hello, server!";
-    send(client_fd, message, sizeof(message), 0);
-
-    // Close the socket
+  // Устанавливаем соединение с сервером
+  if (connect(client_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
+    perror("\nConnection error\n");
     close(client_fd);
+    exit(1);
+  }
 
-    return 0;
+  while (fgets(buffer, sizeof(buffer), stdin)) {
+
+  // Отправляем текст серверу
+  if (write(client_fd, buffer, strlen(buffer)) == -1) {
+    perror("\nWriting error");
+    close(client_fd);
+    exit(1);
+  }
+  }
+
+  close(client_fd);
+
+  return 0;
 }

@@ -1,76 +1,82 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <ctype.h>
 
-#define SOCKET_PATH "/tmp/uppercase_socket"
-
-void convertToUpper(char* str) {
-    while (*str) {
-        *str = toupper((unsigned char)*str);
-        str++;
-    }
-}
+#define SOCKET_PATH "./unix_domain_socket"
 
 int main() {
-    int server_fd, client_fd;
-    socklen_t client_len;
-    struct sockaddr_un server_addr, client_addr;
+  int server_fd, client_fd;
+  struct sockaddr_un address;
+  char buffer[1024];
+  ssize_t bytes_received;
 
-    // Create socket
-    server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (server_fd == -1) {
-        perror("socket");
-        exit(EXIT_FAILURE);
-    }
+  // Создаем сокет
+  server_fd = socket(AF_UNIX, SOCK_STREAM, 0); // потоковый сокет
+  if (server_fd == -1) {
+    perror("\nSocket making error\n");
+    exit(1);
+  }
 
-    // Set up server address structure
-    server_addr.sun_family = AF_UNIX;
-    strncpy(server_addr.sun_path, SOCKET_PATH, sizeof(server_addr.sun_path) - 1);
+  // Удаляем существующий сокет файл, если он есть
+  unlink(SOCKET_PATH);
 
-    // Bind the socket to the address
-    if (bind(server_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-        perror("bind");
-        exit(EXIT_FAILURE);
-    }
+  // Настраиваем адрес сокета
+  address.sun_family = AF_UNIX;
+  strncpy(address.sun_path, SOCKET_PATH, sizeof(address.sun_path) - 1);
 
-    // Listen for incoming connections
-    if (listen(server_fd, 5) == -1) {
-        perror("listen");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Server is listening on %s\n", SOCKET_PATH);
-
-    // Accept a connection
-    client_len = sizeof(client_addr);
-    client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
-    if (client_fd == -1) {
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
-
-    printf("Client connected\n");
-
-    // Handle data transfer
-    char buffer[1024];
-    ssize_t bytes_received;
-
-    while ((bytes_received = recv(client_fd, buffer, sizeof(buffer), 0)) > 0) {
-        convertToUpper(buffer);
-        printf("Received from client: %s\n", buffer);
-    }
-
-    // Close the sockets
-    close(client_fd);
+  // Привязываем сокет к адресу
+  if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
+    perror("\nServer connection error\n");
     close(server_fd);
+    exit(1);
+  }
 
-    // Remove the socket file
-    unlink(SOCKET_PATH);
+  // Слушаем на сокете
+  if (listen(server_fd, 5) == -1) {
+    perror("\nSocket listening error\n");
+    close(server_fd);
+    exit(1);
+  }
 
-    return 0;
+  // Принимаем соединение
+  client_fd = accept(server_fd, NULL, NULL);
+  if (client_fd == -1) {
+    perror("\nAccept error\n");
+    close(server_fd);
+    exit(1);
+  }
+
+  while(1) {
+    // Читаем данные от клиента
+    bytes_received = read(client_fd, buffer, sizeof(buffer) - 1);
+    if (bytes_received == -1) {
+      perror("\nReading from client error\n");
+      close(client_fd);
+      close(server_fd);
+      exit(1);
+    }
+
+    if (buffer[0] == '\0') {
+      break;
+    } else {
+      buffer[bytes_received] = '\0';
+
+      for (int i = 0; buffer[i] != '\0'; i++) {
+        buffer[i] = toupper(buffer[i]);
+      }
+      
+      printf("Received text: %s\n", buffer);
+    }
+
+  }
+  close(client_fd);
+  close(server_fd);
+
+  unlink(SOCKET_PATH);
+
+  return 0;
 }
