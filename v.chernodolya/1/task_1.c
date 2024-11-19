@@ -10,6 +10,9 @@ int main(int argc, char *argv[])
   char options[ ] = "ispuU:cC:dvV:"; 
   int c;
   struct rlimit rlim;
+  unsigned long ulimit_renewed;
+  unsigned long core_size_renewed;
+  char **pointer;
   while ((c = getopt(argc, argv, options)) != EOF) {
     switch (c) {
       case 'i':
@@ -37,7 +40,7 @@ int main(int argc, char *argv[])
         break;
       
       case 'U':
-        unsigned long ulimit_renewed = strtol(optarg, NULL, 10);
+        ulimit_renewed = atol(optarg);
         if (ulimit_renewed <= 0) {
           perror("Failed to set ulimit value\n");
           break;
@@ -65,7 +68,7 @@ int main(int argc, char *argv[])
         break;
 
       case 'C':
-        unsigned long core_size_renewed = strtol(optarg, NULL, 10);
+        core_size_renewed = strtol(optarg, NULL, 10);
         if (core_size_renewed <= 0) {
           perror("Failed to set core size\n");
           break;
@@ -89,7 +92,7 @@ int main(int argc, char *argv[])
         break;
 
       case 'v':
-        char **pointer = environ;
+        pointer = environ;
         while (*pointer != NULL) {
           printf("%s\n", *pointer);
           pointer++;
