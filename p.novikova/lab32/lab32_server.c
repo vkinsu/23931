@@ -5,14 +5,36 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <ctype.h>
+#include <pthread.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
+
+void *handle_client(void *arg) {
+  int client_fd = *(int *)arg;
+  char buffer[1024];
+  ssize_t bytes_received;
+
+  while ((bytes_received = read(client_fd, buffer, sizeof(buffer) - 1)) > 0) {
+    buffer[bytes_received] = '\0';
+
+    for (int j = 0; buffer[j] != '\0'; j++) {
+      buffer[j] = toupper(buffer[j]);
+    }
+
+    printf("Received text: %s\n", buffer);
+  }
+
+  close(client_fd);
+  free(arg);
+  return NULL;
+}
 
 int main() {
   int server_fd, client_fd;
   struct sockaddr_un address;
-  char buffer[1024];
-  ssize_t bytes_received;
+  struct sockaddr_un client_address;
+  socklen_t client_len;
+  pthread_t client_thread;
 
   // Создаем сокет
   server_fd = socket(AF_UNIX, SOCK_STREAM, 0); // потоковый сокет
@@ -21,7 +43,6 @@ int main() {
     exit(1);
   }
 
-  // Удаляем существующий сокет файл, если он есть
   unlink(SOCKET_PATH);
 
   // Настраиваем адрес сокета
@@ -42,40 +63,27 @@ int main() {
     exit(1);
   }
 
-  // Принимаем соединение
-  client_fd = accept(server_fd, NULL, NULL);
-  if (client_fd == -1) {
-    perror("\nAccept error\n");
-    close(server_fd);
-    exit(1);
-  }
+  while (1) {
+    client_len = sizeof(client_address);
+    client_fd = accept(server_fd, (struct sockaddr *)&client_address, &client_len);
+    if (client_fd == -1) {
+      perror("\nAccept error\n");
+      continue;
+    }
 
-  while(1) {
-    // Читаем данные от клиента
-    bytes_received = read(client_fd, buffer, sizeof(buffer) - 1);
-    if (bytes_received == -1) {
-      perror("\nReading from client error\n");
+    int *client_fd_ptr = malloc(sizeof(int));
+    *client_fd_ptr = client_fd;
+
+    if (pthread_create(&client_thread, NULL, handle_client, client_fd_ptr) != 0) {
+      perror("\nThread creation error\n");
       close(client_fd);
-      close(server_fd);
-      exit(1);
-    }
-
-    if (buffer[0] == '\0') {
-      break;
+      free(client_fd_ptr);
     } else {
-      buffer[bytes_received] = '\0';
-
-      for (int i = 0; buffer[i] != '\0'; i++) {
-        buffer[i] = toupper(buffer[i]);
-      }
-      
-      printf("Received text: %s\n", buffer);
+      pthread_detach(client_thread);
     }
-
   }
-  close(client_fd);
-  close(server_fd);
 
+  close(server_fd);
   unlink(SOCKET_PATH);
 
   return 0;

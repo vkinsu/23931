@@ -31,15 +31,15 @@ int main() {
   }
 
   while (fgets(buffer, sizeof(buffer), stdin)) {
-
-  // Отправляем текст серверу
-  if (write(client_fd, buffer, strlen(buffer)) == -1) {
-    perror("\nWriting error");
-    close(client_fd);
-    exit(1);
+    // Отправляем текст серверу
+    if (write(client_fd, buffer, strlen(buffer)) == -1) {
+      perror("\nWriting error");
+      close(client_fd);
+      exit(1);
+    }
   }
-  }
 
+  // Закрываем сокет
   close(client_fd);
 
   return 0;
