@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 int main(int argc, char *argv[]) {
     // argv[1] - команда; все, что далее это аргументы к команде

@@ -2,14 +2,18 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
+#include <termios.h>
+#include <string.h>
 
-volatile sig_atomic_t sigint_count = 0;
+int sigint_count = 0;
 
 void handle_sigint(int sig) {
+    signal(SIGINT, SIG_IGN);
     printf("\a");
-    fflush(stdout);
+    fflush(NULL);
     printf("\nReceived SIGINT (signal %d)\n", sig);
     sigint_count++;
+    sigset(SIGINT, handle_sigint);
 }
 
 void handle_sigquit(int sig) {
@@ -18,8 +22,8 @@ void handle_sigquit(int sig) {
 }
 
 int main() {
-    signal(SIGINT, handle_sigint);
-    signal(SIGQUIT, handle_sigquit);
+    sigset(SIGINT, handle_sigint);
+    sigset(SIGQUIT, handle_sigquit);
 
     while (1) {
         pause();
