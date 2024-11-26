@@ -5,36 +5,19 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <ctype.h>
-#include <pthread.h>
+#include <sys/select.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
-
-void *handle_client(void *arg) {
-  int client_fd = *(int *)arg;
-  char buffer[1024];
-  ssize_t bytes_received;
-
-  while ((bytes_received = read(client_fd, buffer, sizeof(buffer) - 1)) > 0) {
-    buffer[bytes_received] = '\0';
-
-    for (int j = 0; buffer[j] != '\0'; j++) {
-      buffer[j] = toupper(buffer[j]);
-    }
-
-    printf("Received text: %s\n", buffer);
-  }
-
-  close(client_fd);
-  free(arg);
-  return NULL;
-}
 
 int main() {
   int server_fd, client_fd;
   struct sockaddr_un address;
+  char buffer[1024];
+  ssize_t bytes_received;
+  fd_set read_fds, master_fds;
+  int max_fd, new_fd;
   struct sockaddr_un client_address;
   socklen_t client_len;
-  pthread_t client_thread;
 
   // Создаем сокет
   server_fd = socket(AF_UNIX, SOCK_STREAM, 0); // потоковый сокет
@@ -43,6 +26,7 @@ int main() {
     exit(1);
   }
 
+  // Удаляем существующий сокет файл, если он есть
   unlink(SOCKET_PATH);
 
   // Настраиваем адрес сокета
@@ -63,23 +47,53 @@ int main() {
     exit(1);
   }
 
+  // добавляем серверный сокет
+  FD_ZERO(&master_fds);
+  FD_SET(server_fd, &master_fds);
+  max_fd = server_fd;
+
   while (1) {
-    client_len = sizeof(client_address);
-    client_fd = accept(server_fd, (struct sockaddr *)&client_address, &client_len);
-    if (client_fd == -1) {
-      perror("\nAccept error\n");
-      continue;
+    read_fds = master_fds;
+    if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) == -1) {
+      perror("\nSelect error\n");
+      close(server_fd);
+      exit(1);
     }
 
-    int *client_fd_ptr = malloc(sizeof(int));
-    *client_fd_ptr = client_fd;
+    for (int i = 0; i <= max_fd; i++) {
+      if (FD_ISSET(i, &read_fds)) {
+        if (i == server_fd) {
+          // Новое соединение
+          client_len = sizeof(client_address);
+          new_fd = accept(server_fd, (struct sockaddr *)&client_address, &client_len);
+          if (new_fd == -1) {
+            perror("\nAccept error\n");
+          } else {
+            FD_SET(new_fd, &master_fds);
+            if (new_fd > max_fd) {
+              max_fd = new_fd;
+            }
+          }
+        } else {
+          // Читаем данные от клиента
+          bytes_received = read(i, buffer, sizeof(buffer) - 1);
+          if (bytes_received <= 0) {
+            if (bytes_received == -1) {
+              perror("\nReading from client error\n");
+            }
+            close(i);
+            FD_CLR(i, &master_fds);
+          } else {
+            buffer[bytes_received] = '\0';
 
-    if (pthread_create(&client_thread, NULL, handle_client, client_fd_ptr) != 0) {
-      perror("\nThread creation error\n");
-      close(client_fd);
-      free(client_fd_ptr);
-    } else {
-      pthread_detach(client_thread);
+            for (int j = 0; buffer[j] != '\0'; j++) {
+              buffer[j] = toupper(buffer[j]);
+            }
+
+            printf("Received text: %s\n", buffer);
+          }
+        }
+      }
     }
   }
 
