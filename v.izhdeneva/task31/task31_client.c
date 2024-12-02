@@ -24,7 +24,7 @@ int main() {
     // define the server address
     struct sockaddr_un server_address;
     server_address.sun_family = AF_UNIX;
-    strncpy(server_address.sun_path, SOCKET_PATH, sizeof(server_address.sun_path) - 1);
+    strncpy(server_address.sun_path, SOCKET_PATH, sizeof(server_address.sun_path));
     // server_address.sun_port = htons(PORT);
     // server_address.sun_addr.s_addr = INADDR_ANY;
 

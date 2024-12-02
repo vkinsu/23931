@@ -20,7 +20,7 @@ void to_uppercase(char *str) {
 
 int main() {
     char buffer[1024] = {0};
-
+    
     // create the server socket
     int server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
 
@@ -55,47 +55,20 @@ int main() {
         exit(-1);
     }
 
-    fd_set read_sockets, master_sockets;
-    int max_socket, new_socket;
-    struct sockaddr_un client_address;
-    socklen_t client_len;
+    int client_socket = accept(server_socket, NULL, NULL);
 
-    FD_ZERO(&master_sockets);
-    FD_SET(server_socket, &master_sockets);
-    max_socket = server_socket;
-
-    while (1) {
-        read_sockets = master_sockets;
-        int select_socket = select(max_socket + 1, &read_sockets, NULL, NULL, NULL);
-        if (select_socket == -1) {
-	    perror("\nxxxx select xxxx\n");
-	    exit(-1);
-	}
-	for (int i = 0; i <= max_socket; i++) {
-	   if (FD_ISSET(i, &read_sockets)) {
-	      if (i == server_socket) {
-	         client_len = sizeof(client_address);
-		 new_socket = accept(server_socket, (struct sockaddr *)&client_address, &client_len);
-		 if (new_socket == -1) {
-		    perror("\nxxxx accept xxxx\n");
-		 } else {
-		    FD_SET(new_socket, &master_sockets);
-		    if (new_socket > max_socket) {
-		       max_socket = new_socket;
-		    }
-		 }
-	      } else {
-	      	 read(i, buffer, sizeof(buffer));
-		 to_uppercase(buffer);
-		 printf("CLient: %s\n", buffer);
-	         close(i);
-		 FD_CLR(i, &master_sockets);
-	      }
-	   }
-	}
+    // check if we can't connect to client socket
+    if (client_socket == -1) {
+        perror("\nxxxx accept xxxx\n");
+        exit(-1);
     }
 
+    read(client_socket, buffer, sizeof(buffer));
+    to_uppercase(buffer);
+    printf("Client: %s\n", buffer);
+
+    close(client_socket);
     close(server_socket);
-    unlink(SOCKET_PATH);
+
     return 0;
 }

@@ -1,4 +1,4 @@
 run:
-	gcc task31_server.c -o server 
-	gcc task31_client.c -o client 
-	./server & ./client
+	gcc task31_server.c -o server -lsocket -lnsl 
+	gcc task31_client.c -o client1 -lsocket -lnsl
+	gcc task31_client.c -o client2 -lsocket -lnsl
