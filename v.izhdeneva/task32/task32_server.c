@@ -22,11 +22,13 @@ void to_uppercase(char *str) {
 void *handle_client(void *arg) {
     int client_socket = *(int *)arg;
     char buffer[1024] = {0};
-    
-    read(client_socket, buffer, sizeof(buffer));
+    int read_message = read(client_socket, buffer, sizeof(buffer));
+    if (read_message == -1) {
+        perror("\nxxxx read xxxx\n");
+	exit(-1);
+    }
     to_uppercase(buffer);
-    printf("Client: %s\n", buffer);
- 
+    printf("received: %s\n", buffer);
     close(client_socket);
     free(arg);
     return NULL;
@@ -43,6 +45,8 @@ int main() {
         perror("\nxxxx socket xxxx\n");
         exit(-1);
     }
+    
+   unlink(SOCKET_PATH);
 
     // define the server address
     struct sockaddr_un server_address;

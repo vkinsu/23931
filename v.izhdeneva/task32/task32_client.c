@@ -10,7 +10,7 @@
 #define SOCKET_PATH "./unix_domain_socket"
 
 int main() {
-    char server_message[256] = "";
+    char server_message[256] = "privet";
 
     // create the server socket
     int client_socket = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -34,13 +34,12 @@ int main() {
         exit(-1);
     }
 
-    printf("Enter the message: \n");
-    scanf("%s", &server_message);
-
-    int send_data = send(client_socket, server_message, strlen(server_message), 0);
-    if (send_data == -1) {
-        perror("\nxxxx send xxxx\n");
-        exit(-1);
+    while (1) {
+	int send_data = send(client_socket, server_message, strlen(server_message), 0);
+	if (send_data = -1) {
+	    perror("\nxxxx send xxxx\n");
+	    exit(-1);
+	}
     }
 
     close(client_socket);
