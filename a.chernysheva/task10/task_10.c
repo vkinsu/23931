@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
     }
     else if (!child) {
         printf("Child process has been created with pid: %i\n", getpid());
-        execv(argv[1], &argv[1]);
+        execvp(argv[1], &argv[1]);
         printf("Finish child process.\n");
         exit(10);
     }
