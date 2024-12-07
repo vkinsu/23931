@@ -10,6 +10,7 @@
 #include <pthread.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
+#define BUFFER_SIZE 1024
 
 void to_uppercase(char *str) {
     while (*str) {
@@ -20,9 +21,8 @@ void to_uppercase(char *str) {
 
 void *handle_client(void *arg) {
     int client_socket = *(int *)arg;
-    char buffer[1024];
-    
-    int read_message;
+    char buffer[BUFFER_SIZE];
+    ssize_t read_message;
  
     while ((read_message = read(client_socket, buffer, sizeof(buffer) - 1)) > 0) {
         buffer[read_message] = '\0';
@@ -42,8 +42,6 @@ void *handle_client(void *arg) {
 }
 
 int main() {
-    char buffer[1024];
-
     // create the server socket
     int server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
     if (server_socket == -1) {
@@ -102,5 +100,6 @@ int main() {
    
 
     close(server_socket);
+    unlink(SOCKET_PATH);
     return 0;
 }

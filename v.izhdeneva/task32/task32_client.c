@@ -8,6 +8,7 @@
 #include <sys/un.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
+#define BUFFER_SIZE 1024
 
 int main(int argc, char* argv[]) {
     char *filename = argv[1];
@@ -27,6 +28,7 @@ int main(int argc, char* argv[]) {
 
     // define the server address
     struct sockaddr_un server_address;
+    memset(&server_address, 0, sizeof(server_address));
     server_address.sun_family = AF_UNIX;
     strncpy(server_address.sun_path, SOCKET_PATH, sizeof(server_address.sun_path));
     // server_address.sun_port = htons(PORT);
@@ -35,13 +37,14 @@ int main(int argc, char* argv[]) {
     int connect_socket = connect(client_socket, (struct sockaddr *)&server_address, sizeof(server_address));
     if (connect_socket == -1) {
         perror("\nxxxx connect xxxx\n");
+	close(client_socket);
         exit(-1);
     }
 
-   char buffer[1024];
+   char buffer[BUFFER_SIZE];
 
     while (1) {
-	if (fgets(buffer, 1024, fp) != NULL) {
+	if (fgets(buffer, BUFFER_SIZE, fp) != NULL) {
 	    int write_message = write(client_socket, buffer, strlen(buffer));
 	    if (write_message == -1) {
 		perror("\nxxxx wirte xxxx\n");
@@ -57,8 +60,8 @@ int main(int argc, char* argv[]) {
 	
 	usleep(delay);
     }
-    fclose(fp);
 
+    fclose(fp);
     close(client_socket);
 
     return 0;
