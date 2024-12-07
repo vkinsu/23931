@@ -22,13 +22,18 @@ void to_uppercase(char *str) {
 void *handle_client(void *arg) {
     int client_socket = *(int *)arg;
     char buffer[1024] = {0};
-    int read_message = read(client_socket, buffer, sizeof(buffer));
-    if (read_message == -1) {
-        perror("\nxxxx read xxxx\n");
-	exit(-1);
+    
+    int read_message;
+    while ((read_message = read(client_socket, buffer, sizeof(buffer))) > 0) {
+        buffer[read_message] = '\0';
+	to_uppercase(buffer);
+	printf("%s", client_socket, buffer);
     }
-    to_uppercase(buffer);
-    printf("received: %s\n", buffer);
+
+    if (read_message <= 0) {
+        perror("\nxxxx read xxxx\n");
+    }
+
     close(client_socket);
     free(arg);
     return NULL;
@@ -85,6 +90,7 @@ int main() {
 	    perror("\nxxxx accept xxxx\n");
 	    continue;
         }
+	// printf("new socket connected\n");
 	int *client_socket_ptr = malloc(sizeof(int));
 	*client_socket_ptr = client_socket;
 	
