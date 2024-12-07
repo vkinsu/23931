@@ -10,7 +10,6 @@
 #include <pthread.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
-// #define PORT 8080
 
 void to_uppercase(char *str) {
     while (*str) {
@@ -21,17 +20,20 @@ void to_uppercase(char *str) {
 
 void *handle_client(void *arg) {
     int client_socket = *(int *)arg;
-    char buffer[1024] = {0};
+    char buffer[1024];
     
     int read_message;
-    while ((read_message = read(client_socket, buffer, sizeof(buffer))) > 0) {
+ 
+    while ((read_message = read(client_socket, buffer, sizeof(buffer) - 1)) > 0) {
         buffer[read_message] = '\0';
-	to_uppercase(buffer);
-	printf("%s", client_socket, buffer);
+	// to_uppercase(buffer);
+	printf("%s", buffer);
     }
 
-    if (read_message <= 0) {
+    if (read_message == -1) {
         perror("\nxxxx read xxxx\n");
+    } else if (read_message == 0) {
+	printf("client%d disconnected", client_socket);
     }
 
     close(client_socket);
@@ -40,18 +42,16 @@ void *handle_client(void *arg) {
 }
 
 int main() {
-    char buffer[1024] = {0};
+    char buffer[1024];
 
     // create the server socket
     int server_socket = socket(AF_UNIX, SOCK_STREAM, 0);
-
-    // check if we can't create the socket
     if (server_socket == -1) {
         perror("\nxxxx socket xxxx\n");
         exit(-1);
     }
     
-   unlink(SOCKET_PATH);
+    unlink(SOCKET_PATH);
 
     // define the server address
     struct sockaddr_un server_address;
@@ -62,8 +62,6 @@ int main() {
 
     // bind the socket to our specified IP and port
     int bind_socket = bind(server_socket, (struct sockaddr*) &server_address, sizeof(server_address));
-
-    // check if we can't bind the socket
     if (bind_socket == -1) {
         perror("\nxxxx server bind xxxx\n");
         exit(-1);
@@ -71,8 +69,6 @@ int main() {
 
     // listen the socket
     int listen_socket = listen(server_socket, 5);
-
-    // check if we can't listen the socket
     if (listen_socket == -1) {
         perror("\nxxxx listen xxxx\n");
         exit(-1);
@@ -104,7 +100,7 @@ int main() {
 	}
     }
    
-    close(server_socket);
 
+    close(server_socket);
     return 0;
 }
