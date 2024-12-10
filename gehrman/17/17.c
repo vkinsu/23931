@@ -8,12 +8,20 @@
 
 #define MAX_LINE_LENGTH 40
 
+// [32-126]
+
 void disable_echo()
 {
     struct termios t;
     tcgetattr(STDIN_FILENO, &t);
     t.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
+    t.c_cc[VMIN] = 1;
+    t.c_cc[VTIME] = 1;
     tcsetattr(STDIN_FILENO, TCSANOW, &t);
+
+    // setvbuf(stdout, NULL, _IONBF, 0); // Disable buffering for stdout
+
+    printf("\r");
 }
 
 void enable_echo()
@@ -34,9 +42,10 @@ void handle_input()
     {
         c = getchar();
 
-        if (c == EOF && pos == 0)
+        if ((c == EOF || c == -1 || c == '0') && pos == 0) // c == EOF && pos == 0
         {
             // CTRL-D at the beginning of the line, exit program
+            printf("\nexiting...\n");
             break;
         }
 
@@ -71,27 +80,42 @@ void handle_input()
                 printf("\b \b");
             }
         }
-        else if (c == 7)
-        {               // Non-printable character (CTRL-G: Beep)
-            putchar(7); // ASCII 7 is the beep sound (BEL)
+        else if (c < 32 || c > 126) // Non-printable character (CTRL-G: Beep)
+        {
+            putchar(7);     // ASCII 7 is the beep sound (BEL)
+            fflush(stdout); // Flush immediately
         }
         else if (isprint(c))
         {
             if (pos < MAX_LINE_LENGTH)
             {
                 line[pos++] = c;
-                putchar(c); // Display the character
+                putchar(c);     // Display the character
+                fflush(stdout); // Flush immediately
             }
             else
             {
-                // Line is full, wrap text
-                if (pos == MAX_LINE_LENGTH)
+                // Coppy overflow into (another) buffer
+                int posOverFlow = 0;
+                char overFlowBuffer[MAX_LINE_LENGTH];
+
+                pos--;
+                while (pos > 0 && line[pos - 1] != ' ')
                 {
-                    printf("\n");
-                    pos = 0;
+                    overFlowBuffer[posOverFlow++] = line[pos];
+                    printf("\b \b");
                 }
-                line[pos++] = c;
-                putchar(c);
+
+                // Print the new line, starting from the overflow from the buffer
+                printf("\n");
+                pos = 0;
+
+                for (int i = 0; i < posOverFlow; i++)
+                {
+                    putchar(overFlowBuffer[i]);
+                    line[pos++] = overFlowBuffer[i];
+                }
+                fflush(stdout); // Flush immediately
             }
         }
     }
@@ -103,6 +127,11 @@ int main()
     disable_echo(); // Turn off canonical mode and echo
 
     printf("Enter text (Ctrl-D to exit):\n");
+    for (int i = 0; i < MAX_LINE_LENGTH; i++)
+    {
+        printf("-");
+    }
+    printf("|\n");
     handle_input();
 
     enable_echo(); // Restore canonical mode and echo
