@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 256
 
 void to_uppercase(char *str) {
     while (*str) {
@@ -26,7 +26,7 @@ void *handle_client(void *arg) {
  
     while ((read_message = read(client_socket, buffer, sizeof(buffer) - 1)) > 0) {
         buffer[read_message] = '\0';
-	// to_uppercase(buffer);
+	to_uppercase(buffer);
 	printf("%s", buffer);
     }
 

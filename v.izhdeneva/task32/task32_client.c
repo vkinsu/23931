@@ -8,7 +8,7 @@
 #include <sys/un.h>
 
 #define SOCKET_PATH "./unix_domain_socket"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 256
 
 int main(int argc, char* argv[]) {
     char *filename = argv[1];
