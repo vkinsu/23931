@@ -9,7 +9,7 @@ volatile sig_atomic_t beep_count = 0;
 void handle_sigint(int sig) {
     (void)sig; 
     beep_count++;
-    printf("\a");
+    printf("\07");
     fflush(stdout);
 }
 
