@@ -56,7 +56,7 @@ void fileInfo(const char* filepath) {
            fileStats.st_nlink,
            userName,
            groupName,
-           S_ISREG(fileStats.st_mode) ? fileStats.st_size : 0,
+           (long)fileStats.st_size,
            formattedTime,
            fileName);
 }

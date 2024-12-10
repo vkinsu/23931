@@ -84,5 +84,5 @@ int main() {
 
     tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 
-    return 0;
+    exit(0);
 }
