@@ -23,8 +23,8 @@ int main() {
     struct sockaddr_un addr;
     char buffer[BUFFER_SIZE];
     fd_set read_fds, active_fds;
+    int active_clients = 0;
 
-    // Создаем сокет
     if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         perror("socket");
         exit(EXIT_FAILURE);
@@ -73,7 +73,8 @@ int main() {
                     if (client_fd > max_fd) {
                         max_fd = client_fd;
                     }
-                    printf("Client connected\n");
+                    active_clients++;
+                    printf("Client connected (total clients: %d)\n", active_clients);
                 } else {
                     ssize_t bytes_read = read(i, buffer, sizeof(buffer) - 1);
                     if (bytes_read > 0) {
@@ -82,12 +83,21 @@ int main() {
                         printf("Client %d: %s\n", i, buffer);
                     } else {
                         if (bytes_read == 0) {
-                            printf("client %d disconnected\n", i);
+                            printf("Client %d disconnected\n", i);
                         } else {
                             perror("read");
                         }
                         close(i);
                         FD_CLR(i, &active_fds);
+                        active_clients--;
+                        printf("Client disconnected (total clients: %d)\n", active_clients);
+
+                        if (active_clients == 0) {
+                            printf("No more clients. Server shutting down.\n");
+                            close(server_fd);
+                            unlink(SOCKET_PATH);
+                            return 0;
+                        }
                     }
                 }
             }
