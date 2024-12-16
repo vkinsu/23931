@@ -145,7 +145,7 @@ int main() {
 
     while(read(0,&tempChar,1)>0) {
 
-        if (tempChar == tty.c_cc[VEOF] && pos == 0) break;
+        if (tempChar == CEOT && pos == 0) break;
 
         else if(tempChar == tty.c_cc[VERASE] && pos>0) {
             BACKSPASE;
