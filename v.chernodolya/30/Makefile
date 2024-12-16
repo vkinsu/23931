@@ -1,7 +1,7 @@
 all: client server
 
-client: task30client.c
-	gcc -o client task30client.c -lsocket -lnsl
+client: task_30_client.c
+	gcc -o client task_30_client.c -lsocket -lnsl
 
-server: task30server.c
-	gcc -o server task30server.c -lsocket -lnsl
+server: task_30_server.c
+	gcc -o server task_30_server.c -lsocket -lnsl
