@@ -7,7 +7,11 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 
+<<<<<<< HEAD
+extern char** environ;
+=======
 extern char **environ;
+>>>>>>> 9fbc56df3b9b7dc097d0a47e99489a56ae276dd8
 
 void print_id() {
     uid_t uid = getuid(); // реальный айди юзера
@@ -46,9 +50,14 @@ void print_cwd() {
 }
 
 void print_env_vars() {
+<<<<<<< HEAD
+   // for (int i = 0; envp[i]; i++) printf("%s\n", envp[i]);
+    for (char** p = environ; *p; p++) printf("%s\n", *p);
+=======
     printf("environment variables are:\n");
     for (char **p = environ; *p; p++) printf("%s\n", *p);
 
+>>>>>>> 9fbc56df3b9b7dc097d0a47e99489a56ae276dd8
 }
 
 void get_ulimit_value() {
@@ -107,7 +116,7 @@ int main(int argc, char *argv[]) {
                 break;
             case 'V':
                 set_env_ver(optarg);
-                break;
+		break;
             case 'C':
                 set_core_size(optarg);
                 break;
