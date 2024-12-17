@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <pthread.h>
 
-#define SOCKET_PATH "/tmp/socket32"
+#define SOCKET_PATH "./unix_domain_socket"
 
 void *handle_client(void *arg) {
   int client_fd = *(int *)arg;

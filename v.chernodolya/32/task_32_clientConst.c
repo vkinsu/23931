@@ -11,7 +11,7 @@
 
 //char *socket_path = "./socket";
 //char *socket_path = "\0hidden";
-char *socket_path = "/tmp/socket32";
+char *socket_path = "./unix_domain_socket";
 
 int main(int argc, char *argv[]) {
   struct sockaddr_un addr;
@@ -39,12 +39,11 @@ int main(int argc, char *argv[]) {
     exit(-1);
   }
 
-  char *t = "This is a connected text and it cant be interrupted by other text message\n\0";
+  char *t = "This is a connected text and it cant be interrupted by other text message/23931/v.chernodolya/32$/23931/v.chernodolya/32$/23931/v.chernodolya/32$/23931/v.chernodolya/32$/23931/v.chernodolya/\n\0";
   rc = strlen(t);
   strncpy(buf, t, strlen(t));
-  int j = 15;
+  int j = 1;
   while(j > 0) {
-    j--;
     sleep(1);
     if (write(fd, buf, rc) != rc) {
       if (rc > 0) fprintf(stderr,"partial write");

@@ -10,7 +10,7 @@
 
 //char *socket_path = "./socket";
 //char *socket_path = "\0hidden";
-char *socket_path = "/tmp/socket32";
+char *socket_path = "./unix_domain_socket";
 
 int main(int argc, char *argv[]) {
   struct sockaddr_un addr;
